@@ -1,10 +1,9 @@
-import logo from './logo.svg';
 import './App.css';
-import OCR from './ocr';
+import ScanImage from './scanImage'
 function App() {
   return (
     <div>
-      <OCR/>
+      <ScanImage/>
     </div>
   );
 }
