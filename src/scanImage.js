@@ -5,15 +5,18 @@ import preprocessImage from './preProcess';
 function ScanImage() {
   const [image, setImage] = useState("");
   const [text, setText] = useState("");
+  const [showProcessedImg, setShowProcessedImg] = useState(false);
+  const [spinner,setSpinner] = useState(false);
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
  
   const handleChange = (event) => {
+    setShowProcessedImg(true);
     setImage(URL.createObjectURL(event.target.files[0]))
   }
 
   const handleClick = () => {
-    
+    setSpinner(true);
     const canvas = canvasRef.current;
     canvas.width = imageRef.current.width;
     canvas.height = imageRef.current.height;
@@ -37,7 +40,7 @@ function ScanImage() {
       let confidence = result.data.confidence
       // Get full output
       let text = result.data.text
-  
+      setSpinner(false);
       setText(text);
       // setPin(patterns);
     })
@@ -45,21 +48,22 @@ function ScanImage() {
 
   return (
     <div className="App">
-      <main className="App-main">
         <h3>Actual image uploaded</h3>
         <img 
-           src={image}  alt="logo"
-           ref={imageRef} 
+           src={image}
+           ref={imageRef}
+           className="actualImage"
            />
-        <h3>Canvas</h3>
-        <canvas ref={canvasRef} width={700} height={300}></canvas>
+        {(showProcessedImg) && (
+          <>
+        <h3>Pre-processed Image</h3>
+        <canvas ref={canvasRef} ></canvas>
+        </>
+        )}
           <h3>Extracted text</h3>
-        <div className="pin-box">
-          <p> {text} </p>
-        </div>
-        <input type="file" onChange={handleChange} />
-        <button onClick={handleClick} style={{height:50}}>Convert to text</button>
-      </main>
+          {(spinner)?<div className="loader"></div>:<textarea className="finalTextArea" disabled>{text}</textarea>}
+        <input type="file" onChange={handleChange} className="fileInput"/>
+        <button onClick={handleClick} className="submitText">Convert to text</button>
     </div>
   );
 }
