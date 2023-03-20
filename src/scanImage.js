@@ -21,8 +21,7 @@ function ScanImage() {
     canvas.width = imageRef.current.width;
     canvas.height = imageRef.current.height;
     const ctx = canvas.getContext('2d');
-
-    ctx.drawImage(imageRef.current, 0, 0);
+    ctx.drawImage(imageRef.current, 0, 0,canvas.width,canvas.height);
     ctx.putImageData(preprocessImage(canvas),0,0);
     const dataUrl = canvas.toDataURL("image/jpeg");
   
@@ -52,14 +51,14 @@ function ScanImage() {
         <img 
            src={image}
            ref={imageRef}
-           className="actualImage"
+           //className="actualImage"
            />
-        {(showProcessedImg) && (
-          <>
+        {/* {(showProcessedImg) && (
+          <> */}
         <h3>Pre-processed Image</h3>
         <canvas ref={canvasRef} ></canvas>
-        </>
-        )}
+        {/* </>
+        )} */}
           <h3>Extracted text</h3>
           {(spinner)?<div className="loader"></div>:<textarea className="finalTextArea" disabled>{text}</textarea>}
         <input type="file" onChange={handleChange} className="fileInput"/>

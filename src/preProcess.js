@@ -1,10 +1,12 @@
 function preprocessImage(canvas) {
     const ctx = canvas.getContext('2d');
     const image = ctx.getImageData(0,0,canvas.width, canvas.height);
+    
     // blurARGB(image.data, canvas, 1);
     // dilate(image.data, canvas);
     invertColors(image.data);
-    thresholdFilter(image.data, 0.5);
+    //thresholdFilter(image.data, 0.5);
+    //ctx.putImageData(image.data,0,0,canvas.width, canvas.height)
     return image;
    
     // const ctx = canvas.getContext('2d')
@@ -12,7 +14,7 @@ function preprocessImage(canvas) {
     // ctx.drawImage(image, 0, 0);
     // const imgData = ctx.getImageData(0, 0, canvas.height, canvas.width);
     // thresholdFilter(imgData.data, 0.7);
-    // ctx.putImageData(imgData,0,0)
+    
     // dataUrl = canvas.toDataURL('image/jpeg');
     // return imgData;
   }
@@ -174,11 +176,12 @@ function preprocessImage(canvas) {
   setPixels(pixels, argb);
   }
   
-  function invertColors(pixels) {
-    for (var i = 0; i < pixels.length; i+= 4) {
-      pixels[i] = pixels[i] ^ 255; // Invert Red
-      pixels[i+1] = pixels[i+1] ^ 255; // Invert Green
-      pixels[i+2] = pixels[i+2] ^ 255; // Invert Blue
+  function invertColors(data) {
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = 255 - data[i]; // red
+      data[i + 1] = 255 - data[i + 1]; // green
+      data[i + 2] = 255 - data[i + 2]; // blue
+      // data[i + 3] is the alpha channel, we leave it unchanged
     }
   }
   // from https://github.com/processing/p5.js/blob/main/src/image/filters.js
