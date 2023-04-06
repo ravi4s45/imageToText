@@ -2,10 +2,56 @@ function preprocessImage(canvas) {
     const ctx = canvas.getContext('2d');
     const image = ctx.getImageData(0,0,canvas.width, canvas.height);
     
-    // blurARGB(image.data, canvas, 1);
-    // dilate(image.data, canvas);
+    //blurARGB(image.data, canvas, 1);
+    //console.log(image.data);
     invertColors(image.data);
-    //thresholdFilter(image.data, 0.5);
+    thresholdFilter(image.data);
+    //invertColors(image.data);
+    // var binaryData = new Array(image.data.length / 4);
+    // for (var i = 0; i < binaryData.length; i++) {
+    //   var r = image.data[i * 4];
+    //   var g = image.data[i * 4 + 1];
+    //   var b = image.data[i * 4 + 2];
+    //   binaryData[i] = (r + g + b) / 3 > 128 ? 1 : 0;
+    // }
+    // console.log(binaryData);
+    
+    // // Define the structuring element
+    // var B = [
+    //   [0, 1, 0],
+    //   [1, 1, 1],
+    //   [0, 1, 0]
+    // ];
+    
+    // // Define the output image
+    // var outputData = new Array(binaryData.length);
+    // for (var i = 0; i < outputData.length; i++) {
+    //   outputData[i] = 0;
+    // }
+    
+    // // Perform dilation
+    // for (var i = 0; i < canvas.height; i++) {
+    //   for (var j = 0; j < canvas.width; j++) {
+    //     for (var k = -1; k <= 1; k++) {
+    //       for (var l = -1; l <= 1; l++) {
+    //         if (i + k >= 0 && i + k < canvas.height && j + l >= 0 && j + l < canvas.width) {
+    //           var index1 = (i + k) * canvas.width + (j + l);
+    //           var index2 = i * canvas.width + j;
+    //           outputData[index2] = Math.max(outputData[index2], B[k + 1][l + 1] + binaryData[index1]);
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+
+    // for (var i = 0; i < image.data.length; i += 4) {
+    //   var value = outputData[i / 4];
+    //   image.data[i] = value;
+    //   image.data[i + 1] = value;
+    //   image.data[i + 2] = value;
+    // }
+    // ctx.putImageData(image, 0, 0);
+    //dilate(image, canvas, ctx);
     //ctx.putImageData(image.data,0,0,canvas.width, canvas.height)
     return image;
    
@@ -176,115 +222,129 @@ function preprocessImage(canvas) {
   setPixels(pixels, argb);
   }
   
-  function invertColors(data) {
-    for (let i = 0; i < data.length; i += 4) {
-      data[i] = 255 - data[i]; // red
-      data[i + 1] = 255 - data[i + 1]; // green
-      data[i + 2] = 255 - data[i + 2]; // blue
-      // data[i + 3] is the alpha channel, we leave it unchanged
+  function invertColors(pixels) {
+    for (var i = 0; i < pixels.length; i+= 4) {
+      let gray = (pixels[i] + pixels[i+1] + pixels[i+2]) / 3;
+      pixels[i] = gray; // Invert Red
+      pixels[i+1] = gray; // Invert Green
+      pixels[i+2] = gray; // Invert Blue
     }
   }
   // from https://github.com/processing/p5.js/blob/main/src/image/filters.js
-  function dilate(pixels, canvas) {
-   let currIdx = 0;
-   const maxIdx = pixels.length ? pixels.length / 4 : 0;
-   const out = new Int32Array(maxIdx);
-   let currRowIdx, maxRowIdx, colOrig, colOut, currLum;
+  function dilate(imageData, canvas, ctx) {
+   
+  //  let currIdx = 0;
+  //  const maxIdx = pixels.length ? pixels.length / 4 : 0;
+  //  const out = new Int32Array(maxIdx);
+  //  let currRowIdx, maxRowIdx, colOrig, colOut, currLum;
   
-   let idxRight, idxLeft, idxUp, idxDown;
-   let colRight, colLeft, colUp, colDown;
-   let lumRight, lumLeft, lumUp, lumDown;
+  //  let idxRight, idxLeft, idxUp, idxDown;
+  //  let colRight, colLeft, colUp, colDown;
+  //  let lumRight, lumLeft, lumUp, lumDown;
   
-   while (currIdx < maxIdx) {
-     currRowIdx = currIdx;
-     maxRowIdx = currIdx + canvas.width;
-     while (currIdx < maxRowIdx) {
-       colOrig = colOut = getARGB(pixels, currIdx);
-       idxLeft = currIdx - 1;
-       idxRight = currIdx + 1;
-       idxUp = currIdx - canvas.width;
-       idxDown = currIdx + canvas.width;
+  //  while (currIdx < maxIdx) {
+  //    currRowIdx = currIdx;
+  //    maxRowIdx = currIdx + canvas.width;
+  //    while (currIdx < maxRowIdx) {
+  //      colOrig = colOut = getARGB(pixels, currIdx);
+  //      idxLeft = currIdx - 1;
+  //      idxRight = currIdx + 1;
+  //      idxUp = currIdx - canvas.width;
+  //      idxDown = currIdx + canvas.width;
   
-       if (idxLeft < currRowIdx) {
-         idxLeft = currIdx;
-       }
-       if (idxRight >= maxRowIdx) {
-         idxRight = currIdx;
-       }
-       if (idxUp < 0) {
-         idxUp = 0;
-       }
-       if (idxDown >= maxIdx) {
-         idxDown = currIdx;
-       }
-       colUp = getARGB(pixels, idxUp);
-       colLeft = getARGB(pixels, idxLeft);
-       colDown = getARGB(pixels, idxDown);
-       colRight = getARGB(pixels, idxRight);
+  //      if (idxLeft < currRowIdx) {
+  //        idxLeft = currIdx;
+  //      }
+  //      if (idxRight >= maxRowIdx) {
+  //        idxRight = currIdx;
+  //      }
+  //      if (idxUp < 0) {
+  //        idxUp = 0;
+  //      }
+  //      if (idxDown >= maxIdx) {
+  //        idxDown = currIdx;
+  //      }
+  //      colUp = getARGB(pixels, idxUp);
+  //      colLeft = getARGB(pixels, idxLeft);
+  //      colDown = getARGB(pixels, idxDown);
+  //      colRight = getARGB(pixels, idxRight);
   
-       //compute luminance
-       currLum =
-         77 * ((colOrig >> 16) & 0xff) +
-         151 * ((colOrig >> 8) & 0xff) +
-         28 * (colOrig & 0xff);
-       lumLeft =
-         77 * ((colLeft >> 16) & 0xff) +
-         151 * ((colLeft >> 8) & 0xff) +
-         28 * (colLeft & 0xff);
-       lumRight =
-         77 * ((colRight >> 16) & 0xff) +
-         151 * ((colRight >> 8) & 0xff) +
-         28 * (colRight & 0xff);
-       lumUp =
-         77 * ((colUp >> 16) & 0xff) +
-         151 * ((colUp >> 8) & 0xff) +
-         28 * (colUp & 0xff);
-       lumDown =
-         77 * ((colDown >> 16) & 0xff) +
-         151 * ((colDown >> 8) & 0xff) +
-         28 * (colDown & 0xff);
+  //      //compute luminance
+  //      currLum =
+  //        77 * ((colOrig >> 16) & 0xff) +
+  //        151 * ((colOrig >> 8) & 0xff) +
+  //        28 * (colOrig & 0xff);
+  //      lumLeft =
+  //        77 * ((colLeft >> 16) & 0xff) +
+  //        151 * ((colLeft >> 8) & 0xff) +
+  //        28 * (colLeft & 0xff);
+  //      lumRight =
+  //        77 * ((colRight >> 16) & 0xff) +
+  //        151 * ((colRight >> 8) & 0xff) +
+  //        28 * (colRight & 0xff);
+  //      lumUp =
+  //        77 * ((colUp >> 16) & 0xff) +
+  //        151 * ((colUp >> 8) & 0xff) +
+  //        28 * (colUp & 0xff);
+  //      lumDown =
+  //        77 * ((colDown >> 16) & 0xff) +
+  //        151 * ((colDown >> 8) & 0xff) +
+  //        28 * (colDown & 0xff);
   
-       if (lumLeft > currLum) {
-         colOut = colLeft;
-         currLum = lumLeft;
-       }
-       if (lumRight > currLum) {
-         colOut = colRight;
-         currLum = lumRight;
-       }
-       if (lumUp > currLum) {
-         colOut = colUp;
-         currLum = lumUp;
-       }
-       if (lumDown > currLum) {
-         colOut = colDown;
-         currLum = lumDown;
-       }
-       out[currIdx++] = colOut;
-     }
-   }
-   setPixels(pixels, out);
+  //      if (lumLeft > currLum) {
+  //        colOut = colLeft;
+  //        currLum = lumLeft;
+  //      }
+  //      if (lumRight > currLum) {
+  //        colOut = colRight;
+  //        currLum = lumRight;
+  //      }
+  //      if (lumUp > currLum) {
+  //        colOut = colUp;
+  //        currLum = lumUp;
+  //      }
+  //      if (lumDown > currLum) {
+  //        colOut = colDown;
+  //        currLum = lumDown;
+  //      }
+  //      out[currIdx++] = colOut;
+  //    }
+  //  }
+  //  setPixels(pixels, out);
   };
   
   // from https://github.com/processing/p5.js/blob/main/src/image/filters.js
-  function thresholdFilter(pixels, level) {
-    if (level === undefined) {
-    level = 0.5;
-    }
-    const thresh = Math.floor(level * 255);
-    for (let i = 0; i < pixels.length; i += 4) {
-    const red = pixels[i];
-    const green = pixels[i + 1];
-    const blue = pixels[i + 2];
-    const gray = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
-    let value;
-    if (gray >= thresh) {
-        value = 255;
+  function thresholdFilter( data/*pixels, level*/) {
+    var thresholdValue = 80;
+  for (var i = 0; i < data.length; i += 4) {
+    var gray = data[i];
+    if (gray < thresholdValue) {
+      data[i] = 0;
+      data[i + 1] = 0;
+      data[i + 2] = 0;
     } else {
-        value = 0;
+      data[i] = 255;
+      data[i + 1] = 255;
+      data[i + 2] = 255;
     }
-    pixels[i] = pixels[i + 1] = pixels[i + 2] = value;
-    }
+  }
+    // if (level === undefined) {
+    // level = 0.5;
+    // }
+    // const thresh = Math.floor(level * 255);
+    // for (let i = 0; i < pixels.length; i += 4) {
+    // const red = pixels[i];
+    // const green = pixels[i + 1];
+    // const blue = pixels[i + 2];
+    // const gray = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    // let value;
+    // if (gray >= thresh) {
+    //     value = 255;
+    // } else {
+    //     value = 0;
+    // }
+    // pixels[i] = pixels[i + 1] = pixels[i + 2] = value;
+    // }
   }
 
 export default preprocessImage
